@@ -38,6 +38,21 @@ import assert from "node:assert/strict";
     const twitterHref = await page.getByRole("link", { name: /Twitter/ }).getAttribute("href");
     assert.equal(twitterHref, "https://x.com/MoPanwar2005");
 
+    // Spotlight tracks the cursor
+    const spotPos = () =>
+      page.evaluate(() => {
+        const el = document.querySelector(".spot");
+        return [el.style.getPropertyValue("--mx"), el.style.getPropertyValue("--my")];
+      });
+    await page.mouse.move(200, 300, { steps: 5 });
+    await page.waitForFunction(() => document.querySelector(".spot").style.getPropertyValue("--mx") === "200px");
+    const posA = await spotPos();
+    await page.mouse.move(900, 500, { steps: 5 });
+    await page.waitForFunction(() => document.querySelector(".spot").style.getPropertyValue("--mx") === "900px");
+    const posB = await spotPos();
+    assert.notDeepEqual(posA, posB, "spotlight position should change with the mouse");
+    assert.deepEqual(posB, ["900px", "500px"]);
+
     console.log("e2e ok");
   } catch (err) {
     console.error(err);
