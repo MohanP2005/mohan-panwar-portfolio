@@ -1,87 +1,92 @@
 import { getSupabase } from "@/lib/supabase";
 import { shouldCountView } from "@/lib/views";
 
-type ViewCountRow = {
+type ViewRow = {
   post_slug: string;
   count: number | string;
 };
 
-type RpcResponse<T> = {
-  data?: T;
-  error?: unknown;
-};
-
-let viewCountsPromise: Promise<Record<string, number>> | null = null;
+let viewCountsCache: Promise<Record<string, number>> | null = null;
+const inflight = new Map<string, Promise<number | null>>();
 
 export async function fetchViewCounts(): Promise<Record<string, number>> {
-  if (viewCountsPromise) {
-    return viewCountsPromise;
+  if (viewCountsCache) {
+    return viewCountsCache;
   }
 
-  const client = getSupabase();
-  if (!client) {
-    return {};
-  }
-
-  const promise = (async () => {
+  viewCountsCache = (async (): Promise<Record<string, number>> => {
+    const client = getSupabase();
+    if (!client) {
+      return {};
+    }
     try {
-      const response = await (client as unknown as {
-        rpc: (fn: string) => Promise<RpcResponse<ViewCountRow[]>>;
-      }).rpc("get_view_counts");
-      const { data, error } = response;
-      if (error || !data) {
+      const response = await client.rpc("get_view_counts");
+      if (response.error) {
         return {};
       }
+      const rows = response.data as ViewRow[] | null;
       const result: Record<string, number> = {};
-      for (const row of data) {
-        const count = typeof row.count === "string" ? Number(row.count) : row.count;
-        if (!Number.isNaN(count)) {
-          result[row.post_slug] = count;
+      if (Array.isArray(rows)) {
+        for (const row of rows) {
+          const count = typeof row.count === "string" ? Number(row.count) : row.count;
+          if (!Number.isNaN(count)) {
+            result[row.post_slug] = count;
+          }
         }
       }
       return result;
     } catch {
       return {};
     }
-  })();
+  })().then((result) => {
+    if (Object.keys(result).length === 0) {
+      viewCountsCache = null;
+    }
+    return result;
+  });
 
-  viewCountsPromise = promise;
-
-  const result = await promise;
-  if (Object.keys(result).length === 0) {
-    viewCountsPromise = null;
-  }
-  return result;
+  return viewCountsCache;
 }
 
 export async function recordView(slug: string): Promise<number | null> {
-  const client = getSupabase();
-  if (!client) {
-    return null;
+  const existing = inflight.get(slug);
+  if (existing) {
+    return existing;
   }
 
-  let storage: Storage | null = null;
-  try {
-    storage = window.sessionStorage;
-  } catch {
-    // storage remains null
-  }
-
-  if (storage && !shouldCountView(storage, slug)) {
-    return null;
-  }
-
-  try {
-    const response = await (client as unknown as {
-      rpc: (fn: string, args: { slug: string }) => Promise<RpcResponse<number | string>>;
-    }).rpc("increment_view", { slug });
-    const { data, error } = response;
-    if (error || data == null) {
+  const promise = (async (): Promise<number | null> => {
+    const client = getSupabase();
+    if (!client) {
       return null;
     }
-    const count = typeof data === "string" ? Number(data) : data;
-    return Number.isNaN(count) ? null : count;
-  } catch {
-    return null;
-  }
+
+    let storage: Storage | null = null;
+    try {
+      storage = window.sessionStorage;
+    } catch {
+      // sessionStorage unavailable
+    }
+
+    if (storage && !shouldCountView(storage, slug)) {
+      return null;
+    }
+
+    try {
+      const response = await client.rpc("increment_view", { slug });
+      if (response.error) {
+        return null;
+      }
+      const data = response.data as number | string | null | undefined;
+      if (data == null) {
+        return null;
+      }
+      const count = typeof data === "string" ? Number(data) : data;
+      return Number.isNaN(count) ? null : count;
+    } catch {
+      return null;
+    }
+  })();
+
+  inflight.set(slug, promise);
+  return promise;
 }

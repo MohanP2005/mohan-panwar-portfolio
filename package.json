@@ -8,7 +8,7 @@
     "start": "npx serve out",
     "lint": "eslint .",
     "test": "node --test tests/lib.test.mts tests/blog.test.mts",
-    "test:e2e": "node tests/e2e.mjs",
+    "test:e2e": "node tests/e2e.mjs && node tests/e2e-blog.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
