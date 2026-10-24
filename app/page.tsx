@@ -1,5 +1,6 @@
 import Spotlight from "@/components/Spotlight";
 import Hero from "@/components/Hero";
+import About from "@/components/About";
 import Work from "@/components/Work";
 import Writing from "@/components/Writing";
 import Contact from "@/components/Contact";
@@ -12,6 +13,7 @@ export default function Home() {
       <div className="content">
         <main>
           <Hero />
+          <About />
           <Work />
           <Writing />
           <Contact />

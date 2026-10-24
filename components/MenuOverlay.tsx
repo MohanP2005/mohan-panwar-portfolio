@@ -16,10 +16,11 @@ type Item = {
 };
 
 const items: Item[] = [
-  { text: "Work", href: "#work", number: "01" },
-  { text: "Writing", href: "#writing", number: "02" },
-  { text: "Contact", href: "#contact", number: "03" },
-  { text: "Resume ↗", href: RESUME_PATH, number: "04", newTab: true },
+  { text: "About", href: "#about", number: "01" },
+  { text: "Work", href: "#work", number: "02" },
+  { text: "Writing", href: "#writing", number: "03" },
+  { text: "Contact", href: "#contact", number: "04" },
+  { text: "Resume ↗", href: RESUME_PATH, number: "05", newTab: true },
 ];
 
 export default function MenuOverlay({ onClose }: Props) {

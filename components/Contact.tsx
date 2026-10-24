@@ -46,7 +46,7 @@ export default function Contact() {
   return (
     <section id="contact" className="section contact" aria-label="Contact">
       <div className="contact-intro">
-        <span className="label">(06) CONTACT</span>
+        <span className="label">(07) CONTACT</span>
         <h2 className="contact-h2">{site.contactHeadline}</h2>
         <p className="contact-copy">{site.contactCopy}</p>
       </div>

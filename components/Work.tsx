@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { projects, type Project } from "@/content/site";
 import { linkProps } from "@/lib/links";
 
@@ -57,10 +57,18 @@ function Preview({
 
 export default function Work() {
   const [sel, setSel] = useState<number>(0);
+  useEffect(() => {
+    const onSelect = (e: Event) => {
+      const i = projects.findIndex((p) => p.name === (e as CustomEvent<string>).detail);
+      if (i >= 0) setSel(i);
+    };
+    window.addEventListener("select-project", onSelect);
+    return () => window.removeEventListener("select-project", onSelect);
+  }, []);
   return (
     <section id="work" className="section work" aria-label="Selected work">
       <div className="work-list-col">
-        <span className="label">(04) SELECTED WORK</span>
+        <span className="label">(05) SELECTED WORK</span>
         <ul className="work-list">
           {projects.map((p, i) => (
             <li key={p.name}>

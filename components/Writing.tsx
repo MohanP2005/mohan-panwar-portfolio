@@ -12,7 +12,7 @@ export default function Writing() {
   return (
     <section id="writing" className="section writing" aria-label="Writing">
       <div className="writing-head">
-        <span className="label">{POSTS_ARE_EXAMPLES ? "(05) WRITING · EXAMPLE POSTS" : "(05) WRITING"}</span>
+        <span className="label">{POSTS_ARE_EXAMPLES ? "(06) WRITING · EXAMPLE POSTS" : "(06) WRITING"}</span>
         <a className="all-posts" href={BLOG_URL} {...linkProps(BLOG_URL)}>All posts →</a>
       </div>
       <div className="writing-grid">

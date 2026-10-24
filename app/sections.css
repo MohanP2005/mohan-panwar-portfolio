@@ -5,7 +5,7 @@
   padding: var(--section-y) var(--gutter);
 }
 
-/* WORK (04) */
+/* WORK (05) */
 .work {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -141,7 +141,7 @@
   }
 }
 
-/* WRITING (05) */
+/* WRITING (06) */
 .writing {
   display: flex;
   flex-direction: column;
@@ -306,7 +306,50 @@
   }
 }
 
-/* CONTACT (06) */
+/* ABOUT (04) */
+.about {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 64px;
+  align-content: start;
+}
+.about-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.about-h2 {
+  margin: 0;
+  font-size: clamp(40px, 4.375vw, 56px);
+  line-height: .95;
+  font-weight: 600;
+  letter-spacing: -.05em;
+}
+.about-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 40em;
+  min-width: 0;
+}
+.about-body p {
+  margin: 0;
+  font-size: 19px;
+  line-height: 30px;
+  color: var(--fg-2);
+}
+.about-link {
+  color: var(--fg);
+  text-decoration: none;
+}
+.about-link:hover,
+.about-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* CONTACT (07) */
 .contact {
   display: grid;
   grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
@@ -501,6 +544,13 @@
 }
 
 @media (max-width: 1023px) {
+  .about {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .about-h2 {
+    font-size: clamp(40px, 8vw, 56px);
+  }
   .contact {
     grid-template-columns: 1fr;
     gap: 40px;
