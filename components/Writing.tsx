@@ -1,38 +1,35 @@
-import { posts, POSTS_ARE_EXAMPLES } from "@/content/posts";
-import { BLOG_URL } from "@/content/site";
-import { linkProps } from "@/lib/links";
+import Link from "next/link";
+import { getAllPosts } from "@/lib/posts";
+import { FeaturedPost, ArchiveList, EmptyFeature } from "@/components/PostParts";
 
 export default function Writing() {
+  const posts = getAllPosts();
   const [latest, ...rest] = posts;
-
-  if (!latest) {
-    return null;
-  }
+  const archive = rest.slice(0, 4);
 
   return (
     <section id="writing" className="section writing" aria-label="Writing">
       <div className="writing-head">
-        <span className="label">{POSTS_ARE_EXAMPLES ? "(06) WRITING · EXAMPLE POSTS" : "(06) WRITING"}</span>
-        <a className="all-posts" href={BLOG_URL} {...linkProps(BLOG_URL)}>All posts →</a>
+        <span className="label">(06) WRITING</span>
+        <Link className="all-posts" href="/blog/">
+          All posts →
+        </Link>
       </div>
-      <div className="writing-grid">
-        <a className="feat" href={latest.url} {...linkProps(latest.url)}>
-          <div className="feat-cover" style={latest.cover ? { backgroundImage: `url(${latest.cover})` } : undefined}>
-            <span className="pill-latest">LATEST</span>
+      {latest ? (
+        <div className="writing-grid">
+          <FeaturedPost post={latest} />
+          <div>
+            <span className="archive-head" style={{ display: "block" }}>
+              ARCHIVE
+            </span>
+            <ArchiveList posts={archive} />
           </div>
-          <div className="feat-body">
-            <span className="feat-meta">{latest.date} · {latest.readTime}</span>
-            <span className="feat-titlerow"><span className="feat-title">{latest.title}</span><span className="go" aria-hidden="true">↗</span></span>
-            <span className="feat-excerpt">{latest.excerpt}</span>
-          </div>
-        </a>
-        <div>
-          <span className="archive-head" style={{ display: "block" }}>ARCHIVE</span>
-          <ul className="archive">
-            {rest.map(p => <li key={p.title}><a className="arow" href={p.url} {...linkProps(p.url)}><span className="arow-date">{p.date}</span><span className="arow-title">{p.title}</span></a></li>)}
-          </ul>
         </div>
-      </div>
+      ) : (
+        <div className="writing-empty">
+          <EmptyFeature />
+        </div>
+      )}
     </section>
   );
 }

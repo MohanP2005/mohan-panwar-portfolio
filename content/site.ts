@@ -1,5 +1,6 @@
 export const BASE_PATH = "/mohan-panwar-portfolio";
-export const BLOG_URL = "#";   // set to Substack/Medium/etc when decided
+export const SITE_URL = "https://mohanp2005.github.io/mohan-panwar-portfolio";
+export const FIRST_POST_DATE = "2026-11-01";
 export const RESUME_PATH = `${BASE_PATH}/resume.pdf`;
 
 export const site = {

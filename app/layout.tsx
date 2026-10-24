@@ -6,6 +6,7 @@ import { GeistMono } from "geist/font/mono";
 
 import "./globals.css";
 import "./sections.css";
+import "./blog.css";
 
 export const metadata: Metadata = {
   title: "Mohan Panwar",
