@@ -52,6 +52,10 @@ const photos = colors.map((c, i) => {
   return { src: `data:image/png;base64,${readFileSync(f).toString("base64")}`, alt: `Test photo ${i + 1}`, caption: `Caption number ${i + 1}` };
 });
 
+// 4th slide: a real short video served from public/about, with a data-URI poster.
+const posterSrc = photos[0].src;
+photos.push({ kind: "video", src: `${BASE_PATH}/about/pickup.mp4`, poster: posterSrc, alt: "Test video", caption: "Caption number 4" });
+
 let server, browser;
 try {
   server = await startServer({ NEXT_PUBLIC_ABOUT_PHOTOS_E2E: JSON.stringify(photos) });
@@ -66,26 +70,47 @@ try {
     assert.equal(await show.getAttribute("aria-label"), "Photos of Mohan");
     const caption = page.getByTestId("slideshow-caption");
     const count = page.getByTestId("slideshow-count");
-    assert.equal((await count.innerText()).trim(), "01 / 03");
+    assert.equal((await count.innerText()).trim(), "01 / 04");
     assert.equal((await caption.innerText()).trim(), "Caption number 1");
 
     await page.getByRole("button", { name: "Next photo" }).click();
-    assert.equal((await count.innerText()).trim(), "02 / 03");
+    assert.equal((await count.innerText()).trim(), "02 / 04");
     assert.equal((await caption.innerText()).trim(), "Caption number 2");
     await page.getByRole("button", { name: "Previous photo" }).click();
-    await page.getByRole("button", { name: "Previous photo" }).click(); // wraps to last
-    assert.equal((await count.innerText()).trim(), "03 / 03");
-    assert.equal((await caption.innerText()).trim(), "Caption number 3");
+    await page.getByRole("button", { name: "Previous photo" }).click(); // wraps to last (the video)
+    assert.equal((await count.innerText()).trim(), "04 / 04");
+    assert.equal((await caption.innerText()).trim(), "Caption number 4");
+    const video = page.locator("video.slideshow-img");
+    await page.waitForFunction(() => { const v = document.querySelector("video.slideshow-img"); return v && !v.paused; }, null, { timeout: 10000 });
+    const vinfo = await video.evaluate((v) => ({ muted: v.muted, loop: v.loop, controls: v.controls, playsInline: v.playsInline, fit: getComputedStyle(v).objectFit, w: v.getBoundingClientRect().width, h: v.getBoundingClientRect().height, fw: v.parentElement.clientWidth, fh: v.parentElement.clientHeight, poster: !!v.poster }));
+    assert.ok(vinfo.muted && vinfo.loop && vinfo.playsInline && !vinfo.controls && vinfo.poster, JSON.stringify(vinfo));
+    assert.equal(vinfo.fit, "cover");
+    assert.ok(Math.abs(vinfo.w - vinfo.fw) < 1.5 && Math.abs(vinfo.h - vinfo.fh) < 1.5, "video fills the frame");
+    await page.getByRole("button", { name: "Previous photo" }).click(); // leave the video
+    await page.waitForFunction(() => document.querySelector("video.slideshow-img").paused, null, { timeout: 5000 });
+    await page.getByRole("button", { name: "Next photo" }).click(); // back to video
+    await page.waitForFunction(() => !document.querySelector("video.slideshow-img").paused, null, { timeout: 10000 });
+    await page.getByRole("button", { name: "Next photo" }).click(); // wraps to 01
+    await page.getByRole("button", { name: "Previous photo" }).click(); // back to 04
 
     await show.focus();
     await page.keyboard.press("ArrowRight");
-    assert.equal((await count.innerText()).trim(), "01 / 03");
+    assert.equal((await count.innerText()).trim(), "01 / 04");
     await page.keyboard.press("ArrowLeft");
-    assert.equal((await count.innerText()).trim(), "03 / 03");
+    assert.equal((await count.innerText()).trim(), "04 / 04");
 
     // only the first image is eager; the rest lazy
-    const loading = await page.$$eval(".slideshow-img", (els) => els.map((e) => e.getAttribute("loading")));
+    const loading = await page.$$eval("img.slideshow-img", (els) => els.map((e) => e.getAttribute("loading")));
     assert.deepEqual(loading, ["eager", "lazy", "lazy"]);
+
+    if (width === 1280) {
+      // reduced motion: the active video must stay paused (poster shown)
+      const rm = await (await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" })).newPage();
+      await rm.goto(server.url, { waitUntil: "networkidle" });
+      await rm.getByRole("button", { name: "Previous photo" }).click(); // to the video
+      await rm.waitForTimeout(1500);
+      assert.equal(await rm.$eval("video.slideshow-img", (v) => v.paused), true, "reduced motion: video must not autoplay");
+    }
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     assert.ok(overflow <= 0, `horizontal overflow at ${width}px: ${overflow}`);

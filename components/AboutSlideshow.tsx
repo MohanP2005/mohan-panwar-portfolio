@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useState } from "react";
+import SlideVideo from "@/components/SlideVideo";
 import { wrapIndex, type AboutPhoto } from "@/lib/slideshow";
 
 function pad(n: number): string {
@@ -71,19 +72,33 @@ export default function AboutSlideshow({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
       >
-        {photos.map((p, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={i}
-            className={"slideshow-img" + (i === idx ? " is-active" : "")}
-            src={p.src}
-            alt={p.alt}
-            loading={i === 0 ? "eager" : "lazy"}
-            decoding="async"
-            draggable={false}
-            aria-hidden={i === idx ? undefined : true}
-          />
-        ))}
+        {photos.map((p, i) => {
+          if (p.kind === "video") {
+            return (
+              <SlideVideo
+                key={i}
+                className={"slideshow-img" + (i === idx ? " is-active" : "")}
+                src={p.src}
+                poster={p.poster}
+                alt={p.alt}
+                active={i === idx}
+              />
+            );
+          }
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              className={"slideshow-img" + (i === idx ? " is-active" : "")}
+              src={p.src}
+              alt={p.alt}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+              draggable={false}
+              aria-hidden={i === idx ? undefined : true}
+            />
+          );
+        })}
       </div>
       <div className="slideshow-meta">
         <div className="slideshow-text" aria-live="polite" aria-atomic="true">

@@ -24,9 +24,34 @@ export const site = {
 };
 
 // About-section photo slideshow. Hidden while this array is empty.
-// Drop image files in public/about/ and add one entry per photo, e.g.:
-//   { src: `${BASE_PATH}/about/pickup-game.jpg`, alt: "Mohan playing pickup basketball", caption: "Pickup on a Sunday." },
-export const aboutPhotos: AboutPhoto[] = [];
+// Drop media in public/about/. Image entries need src/alt/caption; video entries add kind: "video"
+// and an optional poster (shown while loading and under prefers-reduced-motion).
+export const aboutPhotos: AboutPhoto[] = [
+  {
+    kind: "video",
+    src: `${BASE_PATH}/about/pickup.mp4`,
+    poster: `${BASE_PATH}/about/pickup.jpg`,
+    alt: "Mohan taking a shot during a pickup basketball game",
+    caption: "Pickup on a Sunday.",
+  },
+  {
+    src: `${BASE_PATH}/about/pokemon.jpg`,
+    alt: "Several Ditto Pokémon cards in sleeves on top of a box of sleeved bulk cards",
+    caption: "Every Ditto I own. The box under them is why I'm building the app.",
+  },
+  {
+    kind: "video",
+    src: `${BASE_PATH}/about/zipline.mp4`,
+    poster: `${BASE_PATH}/about/zipline.jpg`,
+    alt: "Someone hanging upside down from a zipline in a forest",
+    caption: "Hanging upside down on a zipline.",
+  },
+  {
+    src: `${BASE_PATH}/about/event.jpg`,
+    alt: "A packed room at a TrueMarkets event in New York",
+    caption: "A TrueMarkets event in NYC.",
+  },
+];
 
 export type AboutPart = string | { text: string; project: string };
 export const about: AboutPart[][] = [

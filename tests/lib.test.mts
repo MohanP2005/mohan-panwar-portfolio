@@ -44,8 +44,25 @@ test("parsePhotos handles bad and good input", () => {
   assert.equal(parsePhotos('{"a":1}'), null);
   assert.deepEqual(parsePhotos('[{"src":"a","alt":"b","caption":"c"},{"src":1},null]'), [{ src: "a", alt: "b", caption: "c" }]);
 });
-test("real aboutPhotos is empty (slideshow hidden until photos are added)", () => {
-  assert.ok(Array.isArray(aboutPhotos));
+test("parsePhotos keeps video kind and poster, ignores bad kind, accepts empty strings", () => {
+  assert.deepEqual(
+    parsePhotos('[{"kind":"video","src":"a.mp4","alt":"b","caption":"c","poster":"p.jpg"},{"kind":"gif","src":"x","alt":"y","caption":"z","poster":5},{"src":"","alt":"","caption":""}]'),
+    [
+      { kind: "video", src: "a.mp4", alt: "b", caption: "c", poster: "p.jpg" },
+      { src: "x", alt: "y", caption: "z" },
+      { src: "", alt: "", caption: "" },
+    ],
+  );
+});
+test("real aboutPhotos: 4 slides in order, videos have posters, all media files exist", async () => {
+  const { existsSync } = await import("node:fs");
+  assert.deepEqual(aboutPhotos.map((p) => p.kind ?? "image"), ["video", "image", "video", "image"]);
+  for (const p of aboutPhotos) {
+    assert.ok(p.alt.length > 0 && p.caption.length > 0);
+    const files = [p.src, ...(p.poster ? [p.poster] : [])].map((u) => "public" + u.replace("/mohan-panwar-portfolio", ""));
+    for (const f of files) assert.ok(existsSync(f), `missing ${f}`);
+    if (p.kind === "video") assert.ok(p.poster, "video needs poster");
+  }
 });
 test("project display names are capitalized", () => {
   assert.deepEqual(projects.map((p) => p.name), ["Tablebid", "Gamios", "Loan Pricing PRD", "Trade Hub"]);
