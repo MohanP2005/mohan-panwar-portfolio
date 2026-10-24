@@ -548,8 +548,8 @@
   font-weight: 600;
   letter-spacing: -.07em;
   white-space: nowrap;
-  color: transparent;
-  -webkit-text-stroke: 1.5px var(--outline);
+  color: #000;
+  filter: url(#footer-outline);
   user-select: none;
   padding-top: .1em;
 }
@@ -561,6 +561,12 @@
   bottom: 24px;
   display: flex;
   justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+.private-label {
   font-family: var(--mono);
   font-size: 12px;
   letter-spacing: .08em;

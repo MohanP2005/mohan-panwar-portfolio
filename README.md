@@ -1,64 +1,29 @@
-# Mohan Panwar - Projects Portfolio
+# Mohan Panwar, portfolio
 
-This is my portfolio landing page showcasing my data science and machine learning projects.
+Personal portfolio site: hero, selected work, writing, and a contact section that drafts an email for you. Next.js static export (`output: 'export'`) with Geist, deployed to GitHub Pages.
 
-## 🚀 Deploy for Free
+## Run it locally
 
-### Option 1: GitHub Pages (Recommended - Free & Easy)
+```bash
+npm install
+npm run dev
+```
 
-1. **Create a new repository** on GitHub:
-   - Go to https://github.com/new
-   - Repository name: `mohan-panwar-portfolio` (or your username)
-   - Make it **Public**
-   - Don't initialize with README
+Open http://localhost:3000/mohan-panwar-portfolio/ (the site is served under its Pages basePath, so the bare `localhost:3000/` will 404).
 
-2. **Push this folder to GitHub:**
-   ```bash
-   cd "/Users/mohanpanwar/Documents/Python Folder/Personal/Projects_for_resume/Mohan Panwar landing page link"
-   git init
-   git add .
-   git commit -m "Initial commit: Portfolio landing page"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/mohan-panwar-portfolio.git
-   git push -u origin main
-   ```
+Other scripts:
 
-3. **Enable GitHub Pages:**
-   - Go to your repository on GitHub
-   - Click **Settings** → **Pages**
-   - Under "Source", select **main** branch
-   - Click **Save**
-   - Your site will be live at: `https://YOUR_USERNAME.github.io/mohan-panwar-portfolio/`
+- `npm run build` builds the static site into `out/`
+- `npm run lint` and `npm run typecheck`
+- `npm test` runs the unit tests (`tests/lib.test.mts`)
+- `npm run test:e2e` runs the Copy-email browser check against a running dev server (`E2E_URL` overrides the URL). First time only: `npx playwright install chromium`
 
-### Option 2: Netlify (Free & Fast)
+## Where to edit content
 
-1. Go to https://www.netlify.com/
-2. Sign up/login (free)
-3. Drag and drop this folder to Netlify
-4. Your site will be live instantly at: `https://random-name.netlify.app`
-5. You can customize the domain name
+- `content/site.ts`: email, status line, social links, facts, contact copy, the project list, and the email reason chips. `BLOG_URL` (the "All posts" link) lives here too and is `#` until a blog exists. A link with an empty URL is not rendered (e.g. set Twitter/X `href` to `""` to hide it), and a project with an empty `url` shows `GOING LIVE SOON` instead of an Open project button.
+- `content/posts.ts`: the writing section. `POSTS_ARE_EXAMPLES` is `true` while the posts are placeholders; set it to `false` once they are real. Each post links out via its `url`.
+- `public/resume.pdf`: the resume, linked as `/mohan-panwar-portfolio/resume.pdf`.
 
-### Option 3: Vercel (Free)
+## Deploy
 
-1. Go to https://vercel.com/
-2. Sign up/login
-3. Import this folder
-4. Deploy instantly
-
-## 📝 Customization
-
-Edit `index.html` to:
-- Update your name and title
-- Add your projects
-- Update GitHub links (replace `YOUR_USERNAME`)
-- Add your email and social links
-- Customize colors and styling
-
-## 🔗 Quick Links
-
-After deployment, you'll have a public URL like:
-- `https://YOUR_USERNAME.github.io/mohan-panwar-portfolio/`
-- Or `https://your-site.netlify.app`
-
-Share this URL on your resume, LinkedIn, or anywhere you want to showcase your work!
-
+Pushing to `main` runs `.github/workflows/deploy.yml`, which builds and publishes `out/` to GitHub Pages. One-time setup: Settings, Pages, Source must be set to **GitHub Actions**.

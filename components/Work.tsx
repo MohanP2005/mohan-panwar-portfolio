@@ -17,6 +17,9 @@ function Preview({
   index: number;
   className: string;
 }) {
+  const trimmedUrl = project.url?.trim() ?? "";
+  const hasUrl = trimmedUrl.length > 0;
+
   return (
     <div className={"preview " + className}>
       <div className="preview-top swap" key={index}>
@@ -34,13 +37,19 @@ function Preview({
             </li>
           ))}
         </ul>
-        <a
-          className="btn btn-accent"
-          href={project.url}
-          {...linkProps(project.url)}
-        >
-          Open project ↗
-        </a>
+        {hasUrl ? (
+          <a
+            className="btn btn-accent"
+            href={project.url}
+            {...linkProps(project.url)}
+          >
+            Open project ↗
+          </a>
+        ) : (
+          <span className="private-label">
+            GOING LIVE SOON
+          </span>
+        )}
       </div>
     </div>
   );
@@ -48,13 +57,8 @@ function Preview({
 
 export default function Work() {
   const [sel, setSel] = useState<number>(0);
-
   return (
-    <section
-      id="work"
-      className="section work"
-      aria-label="Selected work"
-    >
+    <section id="work" className="section work" aria-label="Selected work">
       <div className="work-list-col">
         <span className="label">(04) SELECTED WORK</span>
         <ul className="work-list">
@@ -72,21 +76,13 @@ export default function Work() {
                 <span className="prow-num">{pad(i + 1)}</span>
               </button>
               {i === sel && (
-                <Preview
-                  project={p}
-                  index={i}
-                  className="preview-inline"
-                />
+                <Preview project={p} index={i} className="preview-inline" />
               )}
             </li>
           ))}
         </ul>
       </div>
-      <Preview
-        project={projects[sel]}
-        index={sel}
-        className="preview-side"
-      />
+      <Preview project={projects[sel]} index={sel} className="preview-side" />
     </section>
   );
 }

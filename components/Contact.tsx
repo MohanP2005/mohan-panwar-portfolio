@@ -41,7 +41,7 @@ export default function Contact() {
     }
   }
 
-  const links = [site.linkedin, site.github, site.twitter];
+  const links = [site.linkedin, site.github, site.twitter].filter((l) => l.href.trim() !== "");
 
   return (
     <section id="contact" className="section contact" aria-label="Contact">

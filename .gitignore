@@ -19,3 +19,12 @@ Thumbs.db
 /out/
 next-env.d.ts
 *.tsbuildinfo
+
+# Tests
+/test-results/
+/playwright-report/
+
+# Env
+.env
+.env.*
+!.env.example

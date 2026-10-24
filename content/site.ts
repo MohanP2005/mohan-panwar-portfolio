@@ -3,13 +3,14 @@ export const BLOG_URL = "#";   // set to Substack/Medium/etc when decided
 export const RESUME_PATH = `${BASE_PATH}/resume.pdf`;
 
 export const site = {
-  email: "[your email]",
+  email: "mohanpanwar2005@gmail.com",
   statusLine: "[Your status line]",
   year: 2026,
   location: "NEW YORK",
-  github: { label: "GitHub", handle: "@MOHANP2005", href: "https://github.com/MohanP2005" },
-  linkedin: { label: "LinkedIn", handle: "[/IN/HANDLE]", href: "#" },
-  twitter: { label: "Twitter", handle: "[@HANDLE]", href: "#" },
+  github: { label: "GitHub", handle: "@MohanP2005", href: "https://github.com/MohanP2005" },
+  linkedin: { label: "LinkedIn", handle: "/in/mohan-panwar", href: "https://www.linkedin.com/in/mohan-panwar-633a3b338/" },
+  // Twitter/X: set href to "" to hide this row.
+  twitter: { label: "Twitter", handle: "@MoPanwar2005", href: "https://x.com/MoPanwar2005" },
   facts: [
     { label: "(01) CURRENTLY", value: "Building tablebid, live auctions for NYC reservations" },
     { label: "(02) INTO", value: "Trading systems, game bots, data" },
@@ -21,10 +22,10 @@ export const site = {
 
 export type Project = { name: string; year: string; desc: string; tags: string[]; url: string };
 export const projects: Project[] = [
-  { name: "tablebid", year: "2026", desc: "Live auctions for hard-to-get NYC restaurant reservations.", tags: ["Next.js","Postgres","Stripe"], url: "#" },
-  { name: "gamios", year: "2026", desc: "A card game engine with a bot I play against, plus a strategy report.", tags: ["Python","Game AI"], url: "#" },
-  { name: "Loan approval redesign", year: "2026", desc: "Reworking how a small-dollar loan portfolio decides who gets approved.", tags: ["Python","Data analysis"], url: "#" },
-  { name: "trade-hub", year: "2026", desc: "One command that runs a trading strategy as a backtest, on paper, or live.", tags: ["Python","Trading"], url: "#" },
+  { name: "tablebid", year: "2026", desc: "Live auctions for hard-to-get NYC restaurant reservations.", tags: ["Next.js","Postgres","Stripe"], url: "https://tablebid-gold.vercel.app" },
+  { name: "gamios", year: "2026", desc: "A card game engine with a bot I play against, plus a strategy report.", tags: ["Python","Game AI"], url: "" /* private, no public link yet */ },
+  { name: "Loan approval redesign", year: "2026", desc: "Reworking how a small-dollar loan portfolio decides who gets approved.", tags: ["Python","Data analysis"], url: "https://github.com/MohanP2005/small-dollar-loan-approval-redesign" },
+  { name: "trade-hub", year: "2026", desc: "One command that runs a trading strategy as a backtest, on paper, or live.", tags: ["Python","Trading"], url: "" /* private, no public link yet */ },
 ];
 
 export type Reason = { label: string; subject: string; body: string };
