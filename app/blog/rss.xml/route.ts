@@ -15,7 +15,7 @@ export function GET(): Response {
   const xml = buildRss({
     title: "Mohan Panwar: Writing",
     description:
-      "Notes on building tablebid, trading systems, game bots and this site.",
+      "Notes on building Tablebid, trading systems, game bots and this site.",
     siteUrl: SITE_URL,
     items,
   });

@@ -1,3 +1,5 @@
+import type { AboutPhoto } from "@/lib/slideshow";
+
 export const BASE_PATH = "/mohan-panwar-portfolio";
 export const SITE_URL = "https://mohanp2005.github.io/mohan-panwar-portfolio";
 export const FIRST_POST_DATE = "2026-11-01";
@@ -5,7 +7,7 @@ export const RESUME_PATH = `${BASE_PATH}/resume.pdf`;
 
 export const site = {
   email: "mohanpanwar2005@gmail.com",
-  statusLine: "Building tablebid in NYC", // TODO(mohan): confirm
+  statusLine: "Building Tablebid in NYC", // TODO(mohan): confirm
   year: 2026,
   location: "NEW YORK",
   github: { label: "GitHub", handle: "@MohanP2005", href: "https://github.com/MohanP2005" },
@@ -13,7 +15,7 @@ export const site = {
   // Twitter/X: set href to "" to hide this row.
   twitter: { label: "Twitter", handle: "@MoPanwar2005", href: "https://x.com/MoPanwar2005" },
   facts: [
-    { label: "(01) CURRENTLY", value: "Building tablebid, live auctions for NYC reservations" },
+    { label: "(01) CURRENTLY", value: "Building Tablebid, live auctions for NYC reservations" },
     { label: "(02) INTO", value: "Trading systems, game bots, data" },
     { label: "(03) BASED IN", value: "Bay Area → New York" }, // TODO(mohan): confirm
   ],
@@ -21,26 +23,31 @@ export const site = {
   contactCopy: "If you’re hiring, building something, or run a restaurant with a waitlist, I’d love to hear from you.",
 };
 
+// About-section photo slideshow. Hidden while this array is empty.
+// Drop image files in public/about/ and add one entry per photo, e.g.:
+//   { src: `${BASE_PATH}/about/pickup-game.jpg`, alt: "Mohan playing pickup basketball", caption: "Pickup on a Sunday." },
+export const aboutPhotos: AboutPhoto[] = [];
+
 export type AboutPart = string | { text: string; project: string };
 export const about: AboutPart[][] = [
   ["I’m Mohan, a senior majoring in Data Science at Rutgers University, based in New York. I think the best way to learn is by building. Most of my projects start as something I want to exist and can’t find."],
-  ["Right now that’s ", { text: "Tablebid", project: "tablebid" }, ", a marketplace where diners bid for the reservations that are always booked and restaurants keep the upside. Before that I built ", { text: "Gamios", project: "gamios" }, ", a card-game engine with a bot that’s now hard to beat, and a set of ", { text: "Trading Systems and Testing Pipeline", project: "trade-hub" }, " that run backtests, paper trades and live trades from one command. I also took a lending product from raw data to a PRD: framed the problem, tested it on 2.2M loans, and set the KPIs."],
+  ["Right now that’s ", { text: "Tablebid", project: "Tablebid" }, ", a marketplace where diners bid for the reservations that are always booked and restaurants keep the upside. Before that I built ", { text: "Gamios", project: "Gamios" }, ", a card-game engine with a bot that’s now hard to beat, and a set of ", { text: "Trading Systems and Testing Pipeline", project: "Trade Hub" }, " that run backtests, paper trades and live trades from one command. I also took a lending product from raw data to a PRD: framed the problem, tested it on 2.2M loans, and set the KPIs."],
   ["I care about shipping things people actually use, and about writing down what I learn along the way. That’s what the blog is for."],
   ["Off the keyboard: I’ve played basketball my whole life and now I’m a casual pickup regular, I collect Pokémon cards (enough that I’m building an app for them), and I travel whenever I can."],
 ];
 
 export type Project = { name: string; year: string; desc: string; tags: string[]; url: string };
 export const projects: Project[] = [
-  { name: "tablebid", year: "2026", desc: "Live auctions for hard-to-get NYC restaurant reservations.", tags: ["Next.js","Postgres","Stripe"], url: "https://tablebid-gold.vercel.app" },
-  { name: "gamios", year: "2026", desc: "A card game engine with a bot I play against, plus a strategy report.", tags: ["Python","Game AI"], url: "" /* private, no public link yet */ },
-  { name: "Loan pricing PRD", year: "2026", desc: "PM case study: from 2.2M Lending Club loans to a PRD on how income is priced into risk.", tags: ["Product","SQL","Data analysis"], url: "https://github.com/MohanP2005/small-dollar-loan-approval-redesign" },
-  { name: "trade-hub", year: "2026", desc: "One command that runs a trading strategy as a backtest, on paper, or live.", tags: ["Python","Trading"], url: "" /* private, no public link yet */ },
+  { name: "Tablebid", year: "2026", desc: "Live auctions for hard-to-get NYC restaurant reservations.", tags: ["Next.js","Postgres","Stripe"], url: "https://tablebid-gold.vercel.app" },
+  { name: "Gamios", year: "2026", desc: "A card game engine with a bot I play against, plus a strategy report.", tags: ["Python","Game AI"], url: "" /* private, no public link yet */ },
+  { name: "Loan Pricing PRD", year: "2026", desc: "PM case study: from 2.2M Lending Club loans to a PRD on how income is priced into risk.", tags: ["Product","SQL","Data analysis"], url: "https://github.com/MohanP2005/small-dollar-loan-approval-redesign" },
+  { name: "Trade Hub", year: "2026", desc: "One command that runs a trading strategy as a backtest, on paper, or live.", tags: ["Python","Trading"], url: "" /* private, no public link yet */ },
 ];
 
 export type Reason = { label: string; subject: string; body: string };
 export const reasons: Reason[] = [
   { label: "Job opportunity", subject: "Job opportunity at [company]", body: "Hi Mohan,\nI’m at [company] and saw your work on [project]. We have a role you might like…" },
   { label: "Collaboration", subject: "Want to build something together?", body: "Hi Mohan,\nI’m working on [idea] and think we could build it together…" },
-  { label: "tablebid for my restaurant", subject: "tablebid for [restaurant name]", body: "Hi Mohan,\nI run [restaurant] in [neighborhood]. Our tables book out fast and I’d like to hear about a pilot…" },
+  { label: "Tablebid for my restaurant", subject: "Tablebid for [restaurant name]", body: "Hi Mohan,\nI run [restaurant] in [neighborhood]. Our tables book out fast and I’d like to hear about a pilot…" },
   { label: "Just saying hi", subject: "Hey!", body: "Hi Mohan,\nFound your site and wanted to say…" },
 ];

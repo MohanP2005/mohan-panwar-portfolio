@@ -21,3 +21,34 @@ test("linkProps external vs internal", () => {
   assert.deepEqual(linkProps("/resume.pdf"), {});
   assert.deepEqual(linkProps("mailto:a@b.com"), {});
 });
+
+import { wrapIndex, parsePhotos } from "../lib/slideshow.ts";
+import { aboutPhotos, projects, reasons, site } from "../content/site.ts";
+
+test("wrapIndex forward/back wrap and large deltas", () => {
+  assert.equal(wrapIndex(0, 1, 3), 1);
+  assert.equal(wrapIndex(2, 1, 3), 0);
+  assert.equal(wrapIndex(0, -1, 3), 2);
+  assert.equal(wrapIndex(1, 7, 3), 2);
+  assert.equal(wrapIndex(1, -7, 3), 0);
+  assert.equal(wrapIndex(0, 1, 1), 0);
+});
+test("wrapIndex empty length", () => {
+  assert.equal(wrapIndex(0, 1, 0), 0);
+  assert.equal(wrapIndex(3, -1, -2), 0);
+});
+test("parsePhotos handles bad and good input", () => {
+  assert.equal(parsePhotos(undefined), null);
+  assert.equal(parsePhotos("  "), null);
+  assert.equal(parsePhotos("{nope"), null);
+  assert.equal(parsePhotos('{"a":1}'), null);
+  assert.deepEqual(parsePhotos('[{"src":"a","alt":"b","caption":"c"},{"src":1},null]'), [{ src: "a", alt: "b", caption: "c" }]);
+});
+test("real aboutPhotos is empty (slideshow hidden until photos are added)", () => {
+  assert.ok(Array.isArray(aboutPhotos));
+});
+test("project display names are capitalized", () => {
+  assert.deepEqual(projects.map((p) => p.name), ["Tablebid", "Gamios", "Loan Pricing PRD", "Trade Hub"]);
+  assert.ok(reasons.some((r) => r.label === "Tablebid for my restaurant" && r.subject === "Tablebid for [restaurant name]"));
+  assert.ok(site.statusLine.includes("Tablebid") && site.facts[0].value.includes("Tablebid"));
+});

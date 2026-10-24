@@ -11,7 +11,7 @@ import "./blog.css";
 export const metadata: Metadata = {
   title: "Mohan Panwar",
   description:
-    "Mohan Panwar: building tablebid, trading systems, game bots and data projects. Based in New York.",
+    "Mohan Panwar: building Tablebid, trading systems, game bots and data projects. Based in New York.",
 };
 
 export default function RootLayout({

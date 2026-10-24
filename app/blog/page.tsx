@@ -8,7 +8,7 @@ import { getAllPosts } from "@/lib/posts";
 
 export const metadata: Metadata = {
   title: "Writing · Mohan Panwar",
-  description: "Notes on building tablebid, trading systems, game bots and this site.",
+  description: "Notes on building Tablebid, trading systems, game bots and this site.",
   alternates: {
     types: {
       "application/rss+xml": "/mohan-panwar-portfolio/blog/rss.xml",

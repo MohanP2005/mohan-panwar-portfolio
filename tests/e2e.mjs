@@ -53,6 +53,16 @@ import assert from "node:assert/strict";
     assert.notDeepEqual(posA, posB, "spotlight position should change with the mouse");
     assert.equal(posB[0], "900px"); // y is pageY, depends on scroll
 
+    // Real (empty) aboutPhotos: slideshow is not rendered
+    assert.equal(await page.getByTestId("about-slideshow").count(), 0, "slideshow must be hidden with no photos");
+
+    // Capitalized project names
+    const bodyText = await page.locator("body").textContent();
+    assert.ok(bodyText.includes("Building Tablebid in NYC"), "status line capitalized");
+    for (const n of ["Tablebid", "Gamios", "Trade Hub", "Loan Pricing PRD"]) {
+      assert.ok(bodyText.includes(n), `project name ${n} shown`);
+    }
+
     console.log("e2e ok");
   } catch (err) {
     console.error(err);

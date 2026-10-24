@@ -1,7 +1,12 @@
 "use client";
 
 import React from "react";
-import { about } from "@/content/site";
+import { about, aboutPhotos } from "@/content/site";
+import { parsePhotos } from "@/lib/slideshow";
+import AboutSlideshow from "@/components/AboutSlideshow";
+
+// NEXT_PUBLIC_ABOUT_PHOTOS_E2E is a test-only override (unset in production builds).
+const photos = parsePhotos(process.env.NEXT_PUBLIC_ABOUT_PHOTOS_E2E) ?? aboutPhotos;
 
 export default function About() {
   return (
@@ -9,6 +14,7 @@ export default function About() {
       <div className="about-intro">
         <span className="label">(04) ABOUT</span>
         <h2 className="about-h2">Hi, I’m Mohan.</h2>
+        <AboutSlideshow photos={photos} />
       </div>
       <div className="about-body">
         {about.map((paragraph, pIdx) => (
