@@ -17,14 +17,14 @@ export const site = {
     { label: "(03) BASED IN", value: "New York" },
   ],
   contactHeadline: "Have an idea? I’m all ears.",
-  contactCopy: "[One line on what you want to hear about.] Click Email and pick a reason, and I’ll start the message for you.",
+  contactCopy: "If you're hiring, building something, or run a restaurant with a waitlist, I'd love to hear from you.",
 };
 
 export type Project = { name: string; year: string; desc: string; tags: string[]; url: string };
 export const projects: Project[] = [
   { name: "tablebid", year: "2026", desc: "Live auctions for hard-to-get NYC restaurant reservations.", tags: ["Next.js","Postgres","Stripe"], url: "https://tablebid-gold.vercel.app" },
   { name: "gamios", year: "2026", desc: "A card game engine with a bot I play against, plus a strategy report.", tags: ["Python","Game AI"], url: "" /* private, no public link yet */ },
-  { name: "Loan approval redesign", year: "2026", desc: "Reworking how a small-dollar loan portfolio decides who gets approved.", tags: ["Python","Data analysis"], url: "https://github.com/MohanP2005/small-dollar-loan-approval-redesign" },
+  { name: "Loan pricing PRD", year: "2026", desc: "PM case study: from 2.2M Lending Club loans to a PRD on how income is priced into risk.", tags: ["Product","SQL","Data analysis"], url: "https://github.com/MohanP2005/small-dollar-loan-approval-redesign" },
   { name: "trade-hub", year: "2026", desc: "One command that runs a trading strategy as a backtest, on paper, or live.", tags: ["Python","Trading"], url: "" /* private, no public link yet */ },
 ];
 
