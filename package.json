@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "npx serve out",
     "lint": "eslint .",
-    "test": "node --test tests/lib.test.mts",
+    "test": "node --test tests/lib.test.mts tests/blog.test.mts",
     "test:e2e": "node tests/e2e.mjs",
     "typecheck": "tsc --noEmit"
   },
