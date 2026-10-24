@@ -76,7 +76,7 @@ let browser;
 try {
   browser = await chromium.launch({ headless: true });
 
-  // ---------- Phase A: no posts published, no Supabase env ----------
+  // ---------- Phase A: real published post, no Supabase env ----------
   {
     const s = await startServer(3101, {});
     servers.push(s);
@@ -85,30 +85,31 @@ try {
     const errors = watch(page);
 
     await page.goto(`${s.url}/blog/`, { waitUntil: "networkidle" });
-    await page.getByText("First post coming 2026-11-01").waitFor();
+    assert.equal(await page.locator("a.feat .feat-title").innerText(), "I Threw Away My First Website!", "published post featured on /blog");
+    assert.ok((await page.locator("a.feat").getAttribute("href")).endsWith("/blog/i-threw-away-my-first-website/"));
+    assert.equal(await page.getByText("First post coming").count(), 0, "empty state gone");
     assert.equal(await page.locator(".spot").count(), 1, "spotlight on /blog");
-    assert.equal(await page.locator("a.feat").count(), 0, "no featured post link when empty");
     for (const sel of [".comments", ".like-btn", ".view-count"]) {
       assert.equal(await page.locator(sel).count(), 0, `${sel} must not exist without Supabase`);
     }
 
     await page.goto(`${s.url}/`, { waitUntil: "networkidle" });
-    await page.locator("#writing").getByText("First post coming 2026-11-01").waitFor();
+    assert.equal(await page.locator("#writing a.feat .feat-title").innerText(), "I Threw Away My First Website!");
+    assert.ok((await page.locator("#writing a.feat").getAttribute("href")).endsWith("/blog/i-threw-away-my-first-website/"));
     const all = await page.getByRole("link", { name: "All posts →" }).getAttribute("href");
     assert.equal(all, `${BASE_PATH}/blog/`);
 
     const rss = await (await fetch(`${s.url}/blog/rss.xml`)).text();
     assert.ok(rss.startsWith('<?xml version="1.0"'), "rss xml");
-    assert.ok(!rss.includes("<item>"), "no items while all posts are drafts");
+    assert.ok(rss.includes("<item>") && rss.includes("I Threw Away My First Website!"), "rss lists the published post");
 
-    const draft = await fetch(`${s.url}/blog/i-threw-away-my-first-website/`);
-    // dev server answers 500 (export mode, unknown param); the static build simply has no file => 404 on Pages
-    assert.notEqual(draft.status, 200, "draft post is not built");
+    const post = await fetch(`${s.url}/blog/i-threw-away-my-first-website/`);
+    assert.equal(post.status, 200, "published post page is built");
 
     assert.deepEqual(errors, [], "console errors in phase A");
     await ctx.close();
     s.stop();
-    console.log("phase A ok (empty state, drafts hidden, interactive UI hidden)");
+    console.log("phase A ok (published post listed, interactive UI hidden)");
   }
 
   // ---------- Phase B: fixture posts, no Supabase env ----------
@@ -121,7 +122,7 @@ try {
 
     await page.goto(`${s.url}/blog/`, { waitUntil: "networkidle" });
     assert.equal(await page.locator("a.feat .feat-title").innerText(), "Fixture post for end-to-end tests", "newest post is featured");
-    assert.equal(await page.locator(".archive .arow-title").allInnerTexts().then((a) => a.join("|")), "Older fixture post");
+    assert.equal(await page.locator(".archive .arow-title").allInnerTexts().then((a) => a.join("|")), "I Threw Away My First Website!|Older fixture post");
     assert.equal(await page.getByText("Hidden fixture draft").count(), 0, "draft hidden in index");
 
     await page.goto(`${s.url}/`, { waitUntil: "networkidle" });
@@ -150,7 +151,7 @@ try {
     assert.equal(await page.locator(".post-actions").isVisible(), false, "empty actions box is not shown");
 
     const rss = await (await fetch(`${s.url}/blog/rss.xml`)).text();
-    assert.equal((rss.match(/<item>/g) ?? []).length, 2);
+    assert.equal((rss.match(/<item>/g) ?? []).length, 3);
     assert.ok(rss.indexOf("e2e-fixture-post") < rss.indexOf("e2e-fixture-older"), "rss newest first");
     assert.ok(!rss.includes("Hidden fixture draft"));
 
@@ -218,9 +219,9 @@ try {
       // views in index and archive
       await page.goto(`${s.url}/blog/`, { waitUntil: "networkidle" });
       assert.match(await page.locator("a.feat .feat-meta").innerText(), /1,204 VIEWS$/);
-      assert.match(await page.locator(".arow-date").first().innerText(), /7 VIEWS$/);
+      assert.match(await page.locator(".arow-date").last().innerText(), /7 VIEWS$/);
       await page.goto(`${s.url}/`, { waitUntil: "networkidle" });
-      assert.match(await page.locator("#writing .arow-date").first().innerText(), /7 VIEWS$/);
+      assert.match(await page.locator("#writing .arow-date").last().innerText(), /7 VIEWS$/);
 
       // empty state
       state.comments = [];

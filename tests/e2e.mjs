@@ -53,8 +53,10 @@ import assert from "node:assert/strict";
     assert.notDeepEqual(posA, posB, "spotlight position should change with the mouse");
     assert.equal(posB[0], "900px"); // y is pageY, depends on scroll
 
-    // Real (empty) aboutPhotos: slideshow is not rendered
-    assert.equal(await page.getByTestId("about-slideshow").count(), 0, "slideshow must be hidden with no photos");
+    // Real aboutPhotos: slideshow renders all 4 slides (2 images + 2 videos)
+    assert.equal(await page.getByTestId("about-slideshow").count(), 1, "slideshow rendered");
+    assert.equal(await page.locator(".slideshow-img").count(), 4, "4 slides");
+    assert.equal(await page.locator("video.slideshow-img").count(), 2, "2 video slides");
 
     // Capitalized project names
     const bodyText = await page.locator("body").textContent();

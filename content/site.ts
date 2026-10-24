@@ -43,13 +43,13 @@ export const aboutPhotos: AboutPhoto[] = [
     kind: "video",
     src: `${BASE_PATH}/about/zipline.mp4`,
     poster: `${BASE_PATH}/about/zipline.jpg`,
-    alt: "Someone hanging upside down from a zipline in a forest",
-    caption: "Hanging upside down on a zipline.",
+    alt: "Someone hanging upside down from a zipline in a forest in Cancún",
+    caption: "Hanging upside down on a zipline in Cancún.",
   },
   {
     src: `${BASE_PATH}/about/event.jpg`,
-    alt: "A packed room at a TrueMarkets event in New York",
-    caption: "A TrueMarkets event in NYC.",
+    alt: "A packed room at a TrueMarkets event during NYC Tech Week 2026",
+    caption: "TrueMarkets at NYC Tech Week 2026.",
   },
 ];
 
