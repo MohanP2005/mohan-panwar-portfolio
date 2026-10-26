@@ -10,6 +10,8 @@ import assert from "node:assert/strict";
 
 const BASE_PATH = "/mohan-panwar-portfolio";
 const PORT = 3217;
+const PORT_AUTO = 3218;
+const AUTO_MS = 1500;
 const SHOTS = process.env.E2E_SHOTS_DIR;
 
 function crc32(buf) {
@@ -30,12 +32,12 @@ function png(w, h, [r, g, b]) {
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]);
 }
 
-async function startServer(env) {
-  const child = spawn("npx", ["next", "dev", "-p", String(PORT)], {
-    env: { ...process.env, NEXT_DIST_DIR: `.next-e2e-${PORT}`, ...env }, stdio: "ignore", detached: true,
+async function startServer(env, port = PORT) {
+  const child = spawn("npx", ["next", "dev", "-p", String(port)], {
+    env: { ...process.env, NEXT_DIST_DIR: `.next-e2e-${port}`, ...env }, stdio: "ignore", detached: true,
   });
   const stop = () => { try { process.kill(-child.pid); } catch {} };
-  const url = `http://localhost:${PORT}${BASE_PATH}/`;
+  const url = `http://localhost:${port}${BASE_PATH}/`;
   for (let i = 0; i < 120; i++) {
     try { if ((await fetch(url)).status === 200) return { url, stop }; } catch {}
     await new Promise((r) => setTimeout(r, 500));
@@ -56,9 +58,10 @@ const photos = colors.map((c, i) => {
 const posterSrc = photos[0].src;
 photos.push({ kind: "video", src: `${BASE_PATH}/about/pickup.mp4`, poster: posterSrc, alt: "Test video", caption: "Caption number 4" });
 
-let server, browser;
+let server, server2, browser;
 try {
-  server = await startServer({ NEXT_PUBLIC_ABOUT_PHOTOS_E2E: JSON.stringify(photos) });
+  // Manual-navigation server: autoplay interval is huge so it never interferes with the clicks below.
+  server = await startServer({ NEXT_PUBLIC_ABOUT_PHOTOS_E2E: JSON.stringify(photos), NEXT_PUBLIC_SLIDESHOW_IMAGE_MS: "600000" });
   browser = await chromium.launch({ headless: true });
   for (const width of [1280, 375]) {
     const page = await (await browser.newContext({ viewport: { width, height: 900 } })).newPage();
@@ -83,7 +86,8 @@ try {
     const video = page.locator("video.slideshow-img");
     await page.waitForFunction(() => { const v = document.querySelector("video.slideshow-img"); return v && !v.paused; }, null, { timeout: 10000 });
     const vinfo = await video.evaluate((v) => ({ muted: v.muted, loop: v.loop, controls: v.controls, playsInline: v.playsInline, fit: getComputedStyle(v).objectFit, w: v.getBoundingClientRect().width, h: v.getBoundingClientRect().height, fw: v.parentElement.clientWidth, fh: v.parentElement.clientHeight, poster: !!v.poster }));
-    assert.ok(vinfo.muted && vinfo.loop && vinfo.playsInline && !vinfo.controls && vinfo.poster, JSON.stringify(vinfo));
+    assert.equal(vinfo.loop, false, "video must not loop while auto-rotating (needs ended event)");
+    assert.ok(vinfo.muted && vinfo.playsInline && !vinfo.controls && vinfo.poster, JSON.stringify(vinfo));
     assert.equal(vinfo.fit, "cover");
     assert.ok(Math.abs(vinfo.w - vinfo.fw) < 1.5 && Math.abs(vinfo.h - vinfo.fh) < 1.5, "video fills the frame");
     await page.getByRole("button", { name: "Previous photo" }).click(); // leave the video
@@ -122,6 +126,138 @@ try {
       await page.locator("#about").screenshot({ path: join(SHOTS, `about-${width}.png`) });
     }
   }
+
+  // ---- Autoplay: second server with a short image interval ----
+  server.stop(); server = null;
+  server2 = await startServer({ NEXT_PUBLIC_ABOUT_PHOTOS_E2E: JSON.stringify(photos), NEXT_PUBLIC_SLIDESHOW_IMAGE_MS: String(AUTO_MS) }, PORT_AUTO);
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const open = async (opts = {}) => {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, ...opts });
+    const pg = await ctx.newPage();
+    const errs = [];
+    pg.on("pageerror", (e) => errs.push(String(e)));
+    await pg.goto(server2.url, { waitUntil: "networkidle" });
+    const sh = pg.getByTestId("about-slideshow");
+    await sh.scrollIntoViewIfNeeded();
+    await pg.mouse.move(2, 2); // keep the pointer off the slideshow
+    const n = async () => (await pg.getByTestId("slideshow-count").innerText()).trim();
+    const where = async () => { const b = await sh.boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; };
+    return { pg, sh, n, where, errs };
+  };
+
+  {
+    // 1. image auto-advances after the interval (not instantly), and live region is off while rotating
+    const { pg, sh, n, errs } = await open();
+    assert.equal(await n(), "01 / 04");
+    assert.equal(await sh.getAttribute("data-autoplay"), "on");
+    assert.equal(await pg.locator(".slideshow-text").getAttribute("aria-live"), "off");
+    assert.ok(await pg.getByTestId("slideshow-playpause").isVisible(), "pause/play button visible");
+    const t0 = Date.now();
+    await pg.waitForFunction(() => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() === "02 / 04", null, { timeout: 6000 });
+    const dt = Date.now() - t0;
+    assert.ok(dt > AUTO_MS * 0.5 && dt < AUTO_MS * 3, `advance took ${dt}ms`);
+    await pg.waitForFunction(() => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() === "03 / 04", null, { timeout: 6000 });
+
+    // 2. manual nav restarts the timer: click Next just before the tick; the new slide must last a full interval
+    await sleep(AUTO_MS - 400);
+    await pg.getByRole("button", { name: "Previous photo" }).click();
+    const afterClick = await n();
+    const t1 = Date.now();
+    await pg.mouse.move(2, 2);
+    await sleep(AUTO_MS * 0.6);
+    assert.equal(await n(), afterClick, "timer restarted after manual navigation");
+    await pg.waitForFunction((c) => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() !== c, afterClick, { timeout: 6000 });
+    assert.ok(Date.now() - t1 > AUTO_MS * 0.8, "full interval after manual nav");
+
+    // 3. video slide advances after it plays through, then wraps to 01
+    await pg.getByRole("button", { name: "Show photo 4 of 4" }).click();
+    await pg.mouse.move(2, 2);
+    await pg.waitForFunction(() => { const v = document.querySelector("video.slideshow-img"); return v && !v.paused; }, null, { timeout: 10000 });
+    await sleep(AUTO_MS + 500);
+    assert.equal(await n(), "04 / 04", "video slide is not cut short by the image interval");
+    await pg.waitForFunction(() => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() === "01 / 04", null, { timeout: 10000 });
+    assert.deepEqual(errs, []);
+    await pg.context().close();
+  }
+
+  {
+    // 4. hover pauses, leaving resumes
+    const { pg, sh, n, where } = await open();
+    const c = await where();
+    await pg.mouse.move(c.x, c.y);
+    const before = await n();
+    await sleep(AUTO_MS * 2 + 300);
+    assert.equal(await n(), before, "hover pauses auto-advance");
+    assert.equal(await sh.getAttribute("data-autoplay"), "off");
+    await pg.mouse.move(2, 2);
+    await pg.waitForFunction((b) => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() !== b, before, { timeout: 6000 });
+    await pg.context().close();
+  }
+
+  {
+    // 5. pause button stops rotation, play resumes; aria-live goes polite while paused
+    const { pg, n } = await open();
+    const btn = pg.getByTestId("slideshow-playpause");
+    assert.equal(await btn.getAttribute("aria-label"), "Pause slideshow");
+    await btn.click();
+    await pg.mouse.move(2, 2);
+    assert.equal(await btn.getAttribute("aria-label"), "Play slideshow");
+    assert.equal(await pg.locator(".slideshow-text").getAttribute("aria-live"), "polite");
+    const before = await n();
+    await sleep(AUTO_MS * 2 + 300);
+    assert.equal(await n(), before, "pause button stops rotation");
+    await pg.getByRole("button", { name: "Next photo" }).click(); // manual nav still works while paused
+    await pg.mouse.move(2, 2);
+    assert.notEqual(await n(), before);
+    await btn.click();
+    await pg.mouse.move(2, 2);
+    assert.equal(await btn.getAttribute("aria-label"), "Pause slideshow");
+    const mid = await n();
+    await pg.waitForFunction((b) => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() !== b, mid, { timeout: 6000 });
+    await pg.context().close();
+  }
+
+  {
+    // 6. keyboard focus pauses; hidden tab pauses
+    const { pg, sh, n } = await open();
+    await sh.focus();
+    const before = await n();
+    await sleep(AUTO_MS * 2 + 300);
+    assert.equal(await n(), before, "keyboard focus pauses auto-advance");
+    await sh.blur();
+    await pg.waitForFunction((b) => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() !== b, before, { timeout: 6000 });
+    const mid = await n();
+    await pg.evaluate(() => { Object.defineProperty(document, "hidden", { configurable: true, get: () => true }); document.dispatchEvent(new Event("visibilitychange")); });
+    await sleep(AUTO_MS * 2 + 300);
+    assert.equal(await n(), mid, "hidden tab pauses auto-advance");
+    await pg.evaluate(() => { Object.defineProperty(document, "hidden", { configurable: true, get: () => false }); document.dispatchEvent(new Event("visibilitychange")); });
+    await pg.waitForFunction((b) => document.querySelector('[data-testid="slideshow-count"]').textContent.trim() !== b, mid, { timeout: 6000 });
+    await pg.context().close();
+  }
+
+  {
+    // 7. off-screen pauses
+    const { pg, n } = await open();
+    await pg.evaluate(() => window.scrollTo(0, 0));
+    await pg.waitForFunction(() => document.querySelector('[data-testid="about-slideshow"]').dataset.autoplay === "off", null, { timeout: 3000 });
+    const before = await n();
+    await sleep(AUTO_MS * 2 + 300);
+    assert.equal(await n(), before, "off-screen slideshow does not advance");
+    await pg.context().close();
+  }
+
+  {
+    // 8. reduced motion: never auto-advances, no pause button, manual nav still works
+    const { pg, n } = await open({ reducedMotion: "reduce" });
+    assert.equal(await n(), "01 / 04");
+    await sleep(AUTO_MS * 2 + 500);
+    assert.equal(await n(), "01 / 04", "reduced motion: no auto-advance");
+    assert.equal(await pg.getByTestId("slideshow-playpause").count(), 0);
+    assert.equal(await pg.locator(".slideshow-text").getAttribute("aria-live"), "polite");
+    await pg.getByRole("button", { name: "Next photo" }).click();
+    assert.equal(await n(), "02 / 04");
+    await pg.context().close();
+  }
   console.log("e2e slideshow ok");
 } catch (err) {
   console.error(err);
@@ -129,4 +265,5 @@ try {
 } finally {
   if (browser) await browser.close();
   if (server) server.stop();
+  if (server2) server2.stop();
 }

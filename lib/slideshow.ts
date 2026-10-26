@@ -73,3 +73,36 @@ export function parsePhotos(raw: string | undefined): AboutPhoto[] | null {
 
   return photos;
 }
+export const DEFAULT_IMAGE_DELAY_MS = 5000;
+
+export type AutoAdvanceInput = {
+  kind?: "image" | "video";
+  reduced: boolean;
+  videoEnded: boolean;
+  videoFailed: boolean;
+  imageMs?: number;
+};
+
+export function autoAdvanceDelay(input: AutoAdvanceInput): number | null {
+  const baseDelay =
+    typeof input.imageMs === "number" && Number.isFinite(input.imageMs) && input.imageMs > 0
+      ? input.imageMs
+      : DEFAULT_IMAGE_DELAY_MS;
+
+  if (input.reduced) {
+    return null;
+  }
+
+  if (input.kind === "video") {
+    if (input.videoEnded) {
+      return 0;
+    }
+    if (input.videoFailed) {
+      return baseDelay;
+    }
+    return null;
+  }
+
+  // Image or undefined kind
+  return baseDelay;
+}

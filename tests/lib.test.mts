@@ -69,3 +69,12 @@ test("project display names are capitalized", () => {
   assert.ok(reasons.some((r) => r.label === "Tablebid for my restaurant" && r.subject === "Tablebid for [restaurant name]"));
   assert.ok(site.statusLine.includes("Tablebid") && site.facts[0].value.includes("Tablebid"));
 });
+
+test("about copy: three plain-string paragraphs, no project links", async () => {
+  const { about } = await import("../content/site.ts");
+  assert.deepEqual(about, [
+    ["I’m Mohan, a senior studying Data Science at Rutgers, based in New York. I learn best by building, and most of what I make starts as something I wanted to exist and couldn’t find."],
+    ["I care about shipping things people actually use and writing down what I learn along the way."],
+    ["Off the keyboard, I play pickup basketball, collect Pokémon cards, and travel whenever I can."],
+  ]);
+});

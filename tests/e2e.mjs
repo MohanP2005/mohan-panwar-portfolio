@@ -60,7 +60,7 @@ import assert from "node:assert/strict";
 
     // Capitalized project names
     const bodyText = await page.locator("body").textContent();
-    assert.ok(bodyText.includes("Building Tablebid in NYC"), "status line capitalized");
+    assert.ok(bodyText.includes("Building Tablebid"), "status line capitalized");
     for (const n of ["Tablebid", "Gamios", "Trade Hub", "Loan Pricing PRD"]) {
       assert.ok(bodyText.includes(n), `project name ${n} shown`);
     }

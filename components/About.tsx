@@ -8,13 +8,16 @@ import AboutSlideshow from "@/components/AboutSlideshow";
 // NEXT_PUBLIC_ABOUT_PHOTOS_E2E is a test-only override (unset in production builds).
 const photos = parsePhotos(process.env.NEXT_PUBLIC_ABOUT_PHOTOS_E2E) ?? aboutPhotos;
 
+// NEXT_PUBLIC_SLIDESHOW_IMAGE_MS is a test-only override (unset in production builds).
+const imageDelayMs = Number(process.env.NEXT_PUBLIC_SLIDESHOW_IMAGE_MS) || undefined;
+
 export default function About() {
   return (
     <section id="about" className="section about" aria-label="About">
       <div className="about-intro">
         <span className="label">(04) ABOUT</span>
         <h2 className="about-h2">Hi, I’m Mohan.</h2>
-        <AboutSlideshow photos={photos} />
+        <AboutSlideshow photos={photos} imageDelayMs={imageDelayMs} />
       </div>
       <div className="about-body">
         {about.map((paragraph, pIdx) => (

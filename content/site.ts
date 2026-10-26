@@ -7,7 +7,7 @@ export const RESUME_PATH = `${BASE_PATH}/resume.pdf`;
 
 export const site = {
   email: "mohanpanwar2005@gmail.com",
-  statusLine: "Building Tablebid in NYC", // TODO(mohan): confirm
+  statusLine: "Building Tablebid",
   year: 2026,
   location: "NEW YORK",
   github: { label: "GitHub", handle: "@MohanP2005", href: "https://github.com/MohanP2005" },
@@ -55,10 +55,9 @@ export const aboutPhotos: AboutPhoto[] = [
 
 export type AboutPart = string | { text: string; project: string };
 export const about: AboutPart[][] = [
-  ["I’m Mohan, a senior majoring in Data Science at Rutgers University, based in New York. I think the best way to learn is by building. Most of my projects start as something I want to exist and can’t find."],
-  ["Right now that’s ", { text: "Tablebid", project: "Tablebid" }, ", a marketplace where diners bid for the reservations that are always booked and restaurants keep the upside. Before that I built ", { text: "Gamios", project: "Gamios" }, ", a card-game engine with a bot that’s now hard to beat, and a set of ", { text: "Trading Systems and Testing Pipeline", project: "Trade Hub" }, " that run backtests, paper trades and live trades from one command. I also took a lending product from raw data to a PRD: framed the problem, tested it on 2.2M loans, and set the KPIs."],
-  ["I care about shipping things people actually use, and about writing down what I learn along the way. That’s what the blog is for."],
-  ["Off the keyboard: I’ve played basketball my whole life and now I’m a casual pickup regular, I collect Pokémon cards (enough that I’m building an app for them), and I travel whenever I can."],
+  ["I’m Mohan, a senior studying Data Science at Rutgers, based in New York. I learn best by building, and most of what I make starts as something I wanted to exist and couldn’t find."],
+  ["I care about shipping things people actually use and writing down what I learn along the way."],
+  ["Off the keyboard, I play pickup basketball, collect Pokémon cards, and travel whenever I can."],
 ];
 
 export type Project = { name: string; year: string; desc: string; tags: string[]; url: string };

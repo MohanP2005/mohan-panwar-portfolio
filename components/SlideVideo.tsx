@@ -20,20 +20,46 @@ function subscribeReducedPreference(callback: () => void): () => void {
   };
 }
 
+/**
+ * Hook that returns the user's reduced‑motion preference.
+ */
+export function useReducedMotion(): boolean {
+  return useSyncExternalStore(
+    subscribeReducedPreference,
+    getReducedPreferenceSnapshot,
+    getReducedPreferenceServerSnapshot
+  );
+}
+
 export default function SlideVideo(props: {
   src: string;
   poster?: string;
   alt: string;
   active: boolean;
   className: string;
+  loop?: boolean;
+  onEnded?: () => void;
+  onUnplayable?: () => void;
 }) {
-  const { src, poster, alt, active, className } = props;
+  const {
+    src,
+    poster,
+    alt,
+    active,
+    className,
+    loop = true,
+    onEnded,
+    onUnplayable,
+  } = props;
+
   const videoRef = useRef<HTMLVideoElement>(null);
-  const reduced = useSyncExternalStore(
-    subscribeReducedPreference,
-    getReducedPreferenceSnapshot,
-    getReducedPreferenceServerSnapshot
-  );
+  const reduced = useReducedMotion();
+
+  // Keep latest callbacks in refs so they don't affect effect dependencies
+  const onUnplayableRef = useRef<(() => void) | undefined>(undefined);
+  useEffect(() => {
+    onUnplayableRef.current = onUnplayable;
+  }, [onUnplayable]);
 
   // Ensure the video element is muted (React may not set it reliably)
   useEffect(() => {
@@ -42,15 +68,21 @@ export default function SlideVideo(props: {
     }
   }, []);
 
-  // Play/pause logic based on active state and reduced-motion preference
+  // Play/pause logic based on active state and reduced‑motion preference
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    let cancelled = false;
+
     if (active && !reduced) {
       const playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {});
+        playPromise.catch(() => {
+          if (!cancelled && onUnplayableRef.current) {
+            onUnplayableRef.current();
+          }
+        });
       }
     } else {
       video.pause();
@@ -62,7 +94,18 @@ export default function SlideVideo(props: {
         }
       }
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [active, reduced]);
+
+  // Handle video loading errors
+  const handleError = () => {
+    if (!reduced && onUnplayableRef.current) {
+      onUnplayableRef.current();
+    }
+  };
 
   return (
     <video
@@ -71,7 +114,7 @@ export default function SlideVideo(props: {
       src={src}
       poster={poster}
       muted
-      loop
+      loop={loop}
       playsInline
       preload="metadata"
       aria-label={alt}
@@ -79,6 +122,8 @@ export default function SlideVideo(props: {
       tabIndex={-1}
       disablePictureInPicture
       draggable={false}
+      onEnded={onEnded}
+      onError={handleError}
     />
   );
 }
